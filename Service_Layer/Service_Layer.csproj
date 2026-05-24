@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Supabase" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Domain_Layer\Domain_Layer.csproj" />
     <ProjectReference Include="..\Repository_Layer\Repository_Layer.csproj" />
   </ItemGroup>

@@ -12,6 +12,7 @@ using Service_Layer.Service;
 
 using DotNetEnv;
 using System.Diagnostics;
+using Supabase;
 
 namespace FuelTrackerAPI
 {
@@ -27,14 +28,21 @@ namespace FuelTrackerAPI
             builder.Configuration["Jwt:Audience"] = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
             builder.Configuration["Jwt:Issuer"] = Environment.GetEnvironmentVariable("JWT_ISSUER");
 
+            builder.Configuration["Supabase:Url"] = Environment.GetEnvironmentVariable("Url");
+            builder.Configuration["Supabase:AnonKey"] = Environment.GetEnvironmentVariable("AnonKey");
+
+            var options = new SupabaseOptions
+            {
+                AutoConnectRealtime = false
+            };
+            var supabase = new Supabase.Client(builder.Configuration["Supabase:Url"], builder.Configuration["Supabase:AnonKey"], options);
+            await supabase.InitializeAsync();
+
             builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
             // Add database to the container
             builder.Services.AddDbContext<ApplicationDbContext>(options => 
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            var conn = builder.Configuration.GetConnectionString("DefaultConnection");
-            Debug.WriteLine("CONNECTION_STRING: " + conn);
 
             #region Add services to the container.
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -42,9 +50,13 @@ namespace FuelTrackerAPI
             builder.Services.AddScoped<ICustomService<Fuel>, FuelService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
+            builder.Services.AddSingleton(supabase);
+
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IFuelTrackingService, FuelTrackingService>();
+            builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
             #endregion
 
             #region Add identity to the container
