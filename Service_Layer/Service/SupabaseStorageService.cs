@@ -11,8 +11,8 @@ namespace Service_Layer.Service
         public SupabaseStorageService(Supabase.Client supabase)
         {
             _supabase = supabase ?? throw new ArgumentNullException(nameof(supabase));
-        }
-        public async Task<string> GetImageUrl(string path)
+        }   
+        public async Task<string> GetImageUrlAsync(string path)
         {
             return _supabase.Storage.From("images").GetPublicUrl(path);
         }

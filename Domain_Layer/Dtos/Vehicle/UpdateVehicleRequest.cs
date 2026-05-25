@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain_Layer.Dtos.Vehicle
 {
@@ -9,7 +10,7 @@ namespace Domain_Layer.Dtos.Vehicle
         public string Registration { get; set; }
 
         [Required]
-        public string Image { get; set; }
+        public IFormFile Image { get; set; }
 
         [Required]
         [StringLength(52, MinimumLength = 3, ErrorMessage = "Make must be between 3 to 52 characters")]
