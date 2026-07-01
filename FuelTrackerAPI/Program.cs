@@ -24,21 +24,27 @@ namespace FuelTrackerAPI
 
             var builder = WebApplication.CreateBuilder(args);
 
+            #region Environment Variables
             builder.Configuration["Jwt:SigningKey"] = Environment.GetEnvironmentVariable("SIGNING_KEY");
             builder.Configuration["Jwt:Audience"] = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
             builder.Configuration["Jwt:Issuer"] = Environment.GetEnvironmentVariable("JWT_ISSUER");
 
-            builder.Configuration["Supabase:Url"] = Environment.GetEnvironmentVariable("Url");
-            builder.Configuration["Supabase:AnonKey"] = Environment.GetEnvironmentVariable("AnonKey");
+            builder.Configuration["Supabase:Url"] = Environment.GetEnvironmentVariable("URL");
+            builder.Configuration["Supabase:AnonKey"] = Environment.GetEnvironmentVariable("ANONKEY");
 
+            builder.Configuration["Email:Sender"] = Environment.GetEnvironmentVariable("SENDER");
+            builder.Configuration["Email:Password"] = Environment.GetEnvironmentVariable("PASSWORD");
+
+            builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            #endregion
+
+            // Supabase configuration
             var options = new SupabaseOptions
             {
                 AutoConnectRealtime = false
             };
             var supabase = new Supabase.Client(builder.Configuration["Supabase:Url"], builder.Configuration["Supabase:AnonKey"], options);
             await supabase.InitializeAsync();
-
-            builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
             // Add database to the container
             builder.Services.AddDbContext<ApplicationDbContext>(options => 
@@ -53,6 +59,7 @@ namespace FuelTrackerAPI
             builder.Services.AddSingleton(supabase);
 
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IFuelTrackingService, FuelTrackingService>();
@@ -62,11 +69,13 @@ namespace FuelTrackerAPI
             #region Add identity to the container
             builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
+                options.SignIn.RequireConfirmedEmail = true;
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 8;
-            }).AddEntityFrameworkStores<ApplicationDbContext>();
+            }).AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             // Add jwt bearer and authentication schema
             builder.Services.AddAuthentication(options =>

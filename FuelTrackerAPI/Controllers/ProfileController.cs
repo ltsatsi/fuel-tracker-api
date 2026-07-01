@@ -51,9 +51,16 @@ namespace FuelTrackerAPI.Controllers
             var tempImage = user.Photo;
 
             user.Bio = request.Bio;
-            user.Photo = await _imageService.UploadImageAsync(request.Photo, "profiles");
 
-            var result = await _userManager.UpdateAsync(user);
+            if (request.Photo != null)
+            {
+                user.Photo = await _imageService.UploadImageAsync(request.Photo, "profiles");
+            } else
+            {
+                user.Photo = tempImage;
+            }
+
+                var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
             {
