@@ -32,13 +32,13 @@ namespace Domain_Layer.Mappers
             };
         }
 
-        public static VehicleDto ToVehicleDto(this Vehicle vehicle, string? publicImageUrl)
+        public static VehicleDto ToVehicleDto(this Vehicle vehicle)
         {
             return new VehicleDto
             {
                 Id = vehicle.Id,
                 Registration = vehicle.Registration,
-                Image = publicImageUrl ?? vehicle.Image,
+                Image = vehicle.Image,
                 Make = vehicle.Make,
                 Model = vehicle.Model,
                 Year = vehicle.Year,

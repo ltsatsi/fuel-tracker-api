@@ -29,26 +29,16 @@ namespace FuelTrackerAPI
             builder.Configuration["Jwt:Audience"] = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
             builder.Configuration["Jwt:Issuer"] = Environment.GetEnvironmentVariable("JWT_ISSUER");
 
-            builder.Configuration["Supabase:Url"] = Environment.GetEnvironmentVariable("URL");
-            builder.Configuration["Supabase:AnonKey"] = Environment.GetEnvironmentVariable("ANONKEY");
-
             builder.Configuration["Email:Sender"] = Environment.GetEnvironmentVariable("SENDER");
             builder.Configuration["Email:Password"] = Environment.GetEnvironmentVariable("PASSWORD");
 
             builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             #endregion
 
-            // Supabase configuration
-            var options = new SupabaseOptions
-            {
-                AutoConnectRealtime = false
-            };
-            var supabase = new Supabase.Client(builder.Configuration["Supabase:Url"], builder.Configuration["Supabase:AnonKey"], options);
-            await supabase.InitializeAsync();
 
             // Add database to the container
             builder.Services.AddDbContext<ApplicationDbContext>(options => 
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             #region Add services to the container.
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -56,14 +46,11 @@ namespace FuelTrackerAPI
             builder.Services.AddScoped<ICustomService<Fuel>, FuelService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
-            builder.Services.AddSingleton(supabase);
-
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IFuelTrackingService, FuelTrackingService>();
-            builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
             #endregion
 
             #region Add identity to the container
@@ -147,6 +134,9 @@ namespace FuelTrackerAPI
             }
 
             app.UseHttpsRedirection();
+
+            // local file/image upload
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();

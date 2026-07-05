@@ -5,37 +5,44 @@ namespace Service_Layer.Service
 {
     public class ImageService : IImageService
     {
-        private readonly IStorageService _storageService;
-        public ImageService(IStorageService storageService)
-        {
-            _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
-        }
-
         public async Task<string?> UploadImageAsync(IFormFile file, string folder)
         {
-            try
-            {
+            if (file is null || file.Length == 0)
+                return null;
 
-                if (file == null || file.Length == 0)
-                    return null;
+            if (string.IsNullOrWhiteSpace(folder))
+                folder = "uploads";
 
-                string[] allowedExtensions = new string[] { ".jpg", ".jpeg", ".png" };
+            string[] allowedExtensions = new string[] { ".jpg", ".jpeg", ".png" };
 
-                var extension = Path.GetExtension(file.FileName).ToLower();
+            const long maxSize = 5 * 1024 * 1024;
 
-                if (!allowedExtensions.Contains(extension))
-                    return null;
+            if (file.Length > maxSize)
+                return null;
 
-                var maxSize = 5 * 1024 * 1024;
+            var extension = Path.GetExtension(file.FileName).ToLower();
 
-                if (file.Length > maxSize)
-                    return null;
+            if (!allowedExtensions.Contains(extension))
+                return null;
 
-                return await _storageService.UploadImageAsync(file, folder);
-            } catch (Exception)
-            {
-                throw;
-            }
-        }
+            var fileName = $"{Guid.NewGuid()}{extension}";
+
+            var uploadsFolder = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "uploads",
+                folder);
+
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using var stream = new FileStream(filePath, FileMode.Create);
+
+            await file.CopyToAsync(stream);
+
+            return $"uploads/{folder}/{fileName}";
+        } // end method
     } // end class
 } // end namespace

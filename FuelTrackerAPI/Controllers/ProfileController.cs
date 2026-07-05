@@ -16,13 +16,11 @@ namespace FuelTrackerAPI.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ICurrentUserService _currentUserService;
         private readonly IImageService _imageService;
-        private readonly IStorageService _storageService;
-        public ProfileController(UserManager<ApplicationUser> userManager, ICurrentUserService currentUserService, IImageService imageService, IStorageService storageService)
+        public ProfileController(UserManager<ApplicationUser> userManager, ICurrentUserService currentUserService, IImageService imageService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
             _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
-            _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
         }
 
         [HttpGet]
@@ -34,9 +32,7 @@ namespace FuelTrackerAPI.Controllers
             if (user == null)
                 return NotFound();
 
-            var publicImageUrl = await _storageService.GetImageUrlAsync(user.Photo);
-
-            return Ok(user.ToProfileDto(publicImageUrl));
+            return Ok(user.ToProfileDto());
         }
 
         [HttpPut]
@@ -59,19 +55,10 @@ namespace FuelTrackerAPI.Controllers
             {
                 user.Photo = tempImage;
             }
+            
+            var result = await _userManager.UpdateAsync(user);
 
-                var result = await _userManager.UpdateAsync(user);
-
-            if (result.Succeeded)
-            {
-                if (tempImage != null)
-                {
-                    await _storageService.DeleteImageAsync(tempImage);
-                }
-            }
-
-            var publicImageUrl = await _storageService.GetImageUrlAsync(user.Photo);
-            return Ok(user.ToProfileDto(publicImageUrl));
+            return Ok(user.ToProfileDto());
         }
     } // end class
 } // end namespace
