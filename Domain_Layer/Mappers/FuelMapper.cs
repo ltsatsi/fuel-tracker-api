@@ -28,7 +28,7 @@ namespace Domain_Layer.Mappers
                 Odometer = request.Odometer,
                 VehicleId = vehicleId,
 
-                CreatedDate = DateTime.UtcNow,
+                CreatedDate = DateTimeOffset.UtcNow,
                 IsActive = true
             };
         }

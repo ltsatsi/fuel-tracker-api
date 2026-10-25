@@ -5,12 +5,14 @@ namespace Domain_Layer.Dtos.Vehicle
 {
     public class UpdateVehicleRequest
     {
+        public int Id { get; set; }
+
+
         [Required]
         [StringLength(8, MinimumLength = 3, ErrorMessage = "Registration must be between 3 to 8 characters")]
         public string Registration { get; set; }
 
-        [Required]
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
 
         [Required]
         [StringLength(52, MinimumLength = 3, ErrorMessage = "Make must be between 3 to 52 characters")]

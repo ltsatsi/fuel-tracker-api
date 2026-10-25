@@ -16,11 +16,17 @@ namespace FuelTrackerAPI.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ICurrentUserService _currentUserService;
         private readonly IImageService _imageService;
-        public ProfileController(UserManager<ApplicationUser> userManager, ICurrentUserService currentUserService, IImageService imageService)
+        private readonly IStorageService _storageService;
+        public ProfileController(
+            UserManager<ApplicationUser> userManager, 
+            ICurrentUserService currentUserService, 
+            IImageService imageService,
+            IStorageService storageService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
             _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+            _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
         }
 
         [HttpGet]
@@ -32,7 +38,9 @@ namespace FuelTrackerAPI.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(user.ToProfileDto());
+            var publicImageUrl = await _storageService.GetImageUrlAsync(user.Photo);
+
+            return Ok(user.ToProfileDto(publicImageUrl));
         }
 
         [HttpPut]
@@ -45,7 +53,6 @@ namespace FuelTrackerAPI.Controllers
                 return NotFound();
 
             var tempImage = user.Photo;
-
             user.Bio = request.Bio;
 
             if (request.Photo != null)
@@ -58,7 +65,17 @@ namespace FuelTrackerAPI.Controllers
             
             var result = await _userManager.UpdateAsync(user);
 
-            return Ok(user.ToProfileDto());
+            if (result.Succeeded)
+            {
+                if (tempImage != null)
+                {
+                    await _storageService.DeleteImageAsync(tempImage);
+                }
+            }
+
+            var publicImageUrl = await _storageService.GetImageUrlAsync(user.Photo);
+
+            return Ok(user.ToProfileDto(publicImageUrl));
         }
     } // end class
 } // end namespace

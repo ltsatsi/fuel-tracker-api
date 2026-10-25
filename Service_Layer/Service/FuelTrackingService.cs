@@ -112,8 +112,14 @@ namespace Service_Layer.Service
         // Helper
         private async Task<IQueryable<Fuel>?> GetMonthlyEntriesAsync(int? year, int? month, int vehicleId, ApplicationUser currentUser)
         {
-            var now = DateTime.UtcNow;
-            var startOfMonth = new DateTime(year ?? now.Year, month ?? now.Month, 1);
+            var now = DateTimeOffset.UtcNow;
+
+            var selectedYear = year ?? now.Year;
+            var selectedMonth = month ?? now.Month;
+
+            var startOfMonth = new DateTimeOffset(
+                selectedYear, selectedMonth, 1, 0, 0, 0, TimeSpan.Zero);
+
             var startOfNextMonth = startOfMonth.AddMonths(1);
 
             var fuelEntries = await _fuelService.GetAllAsync(new QueryObject());

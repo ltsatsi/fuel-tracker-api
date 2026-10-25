@@ -27,18 +27,18 @@ namespace Domain_Layer.Mappers
                 Model = request.Model,
                 Year = request.Year,
 
-                CreatedDate = DateTime.UtcNow,
+                CreatedDate = DateTimeOffset.UtcNow,
                 IsActive = true
             };
         }
 
-        public static VehicleDto ToVehicleDto(this Vehicle vehicle)
+        public static VehicleDto ToVehicleDto(this Vehicle vehicle, string? publicImageUrl)
         {
             return new VehicleDto
             {
                 Id = vehicle.Id,
                 Registration = vehicle.Registration,
-                Image = vehicle.Image,
+                Image = publicImageUrl ?? vehicle.Image,
                 Make = vehicle.Make,
                 Model = vehicle.Model,
                 Year = vehicle.Year,

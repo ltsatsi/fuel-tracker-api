@@ -20,13 +20,23 @@ namespace FuelTrackerAPI.Controllers
         private readonly ICustomService<Vehicle> _vehicleService;
         private readonly ICurrentUserService _currentUserService;
         private readonly UserManager<ApplicationUser> _userManager;
-        public VehicleController(ICustomService<Vehicle> vehicleService, UserManager<ApplicationUser> userManager, ICurrentUserService currentUserService, IImageService imageService)
+        private readonly IStorageService _storageService;
+        public VehicleController(
+            ICustomService<Vehicle> vehicleService, 
+            UserManager<ApplicationUser> userManager, 
+            ICurrentUserService currentUserService, 
+            IImageService imageService,
+            IStorageService storageService)
         {
             _vehicleService = vehicleService ?? throw new ArgumentNullException(nameof(vehicleService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
             _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+            _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
         }
+
+
+
 
         [HttpGet]
         [Authorize]
@@ -41,7 +51,7 @@ namespace FuelTrackerAPI.Controllers
 
             var vehiclesDto = await vehicles
                 .Where(v => v.ApplicationUserId == user.Id)
-                .Select(v => v.ToVehicleDto())
+                .Select(v => v.ToVehicleDto(null))
                 .ToListAsync();
 
             return Ok(vehiclesDto);
@@ -64,7 +74,9 @@ namespace FuelTrackerAPI.Controllers
             if (vehicle.ApplicationUserId != user.Id)
                 return NotFound();
 
-            return Ok(vehicle.ToVehicleDto());
+            var publicImageUrl = await _storageService.GetImageUrlAsync(vehicle.Image);
+
+            return Ok(vehicle.ToVehicleDto(publicImageUrl));
         }
 
         [HttpPost]
@@ -88,8 +100,10 @@ namespace FuelTrackerAPI.Controllers
             vehicle.ApplicationUserId = user.Id;
             await _vehicleService.CreateAsync(vehicle);
 
+            var publicImageUrl = await _storageService.GetImageUrlAsync(vehicle.Image);
 
-            return CreatedAtAction(nameof(GetById), new { id = vehicle.Id }, vehicle.ToVehicleDto());
+
+            return CreatedAtAction(nameof(GetById), new { id = vehicle.Id }, vehicle.ToVehicleDto(publicImageUrl));
         }
 
         [Authorize]
@@ -99,14 +113,10 @@ namespace FuelTrackerAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var imageUrl = await _imageService.UploadImageAsync(request.Image, "vehicles");
             var user = await _currentUserService.GetCurrentUserAsync();
 
             if (user == null)
                 return Unauthorized();
-
-            if (imageUrl == null)
-                return BadRequest();
 
             var vehicle = await _vehicleService.GetByIdAsync(id);
 
@@ -116,20 +126,29 @@ namespace FuelTrackerAPI.Controllers
             if (vehicle.ApplicationUserId != user.Id)
                 return NotFound();
 
+            await _storageService.DeleteImageAsync(vehicle.Image);
 
             vehicle.Registration = request.Registration.ToUpper();
-            vehicle.Image = imageUrl;
+
+            if (request.Image != null)
+            {
+                string? newImage = await _imageService.UploadImageAsync(request.Image, "vehicles");
+                vehicle.Image = newImage!;
+            }
+
             vehicle.Make = request.Make;
             vehicle.Model = request.Model;
             vehicle.Year = request.Year;
 
-            vehicle.ModifiedOn = DateTime.UtcNow;
+            vehicle.ModifiedOn = DateTimeOffset.UtcNow;
             vehicle.IsActive = true;
 
 
             await _vehicleService.UpdateAsync(vehicle);
 
-            return Ok(vehicle.ToVehicleDto());
+            var publicImageUrl = await _storageService.GetImageUrlAsync(vehicle.Image);
+
+            return Ok(vehicle.ToVehicleDto(publicImageUrl));
         }
 
         [Authorize]
@@ -149,6 +168,7 @@ namespace FuelTrackerAPI.Controllers
             if (vehicle.ApplicationUserId != user.Id)
                 return NotFound();
 
+            await _storageService.DeleteImageAsync(vehicle.Image);
             await _vehicleService.DeleteAsync(vehicle);
             return NoContent();
         }

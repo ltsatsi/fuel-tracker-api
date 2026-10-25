@@ -100,7 +100,7 @@ namespace FuelTrackerAPI.Controllers
             fuel.Station = request.Station;
             fuel.Liter = request.Liter;
             fuel.Odometer = request.Odometer;
-            fuel.ModifiedOn = DateTime.UtcNow;
+            fuel.ModifiedOn = DateTimeOffset.UtcNow;
 
             await _fuelService.UpdateAsync(fuel);
             return Ok(fuel.ToFuelDto());

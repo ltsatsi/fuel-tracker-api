@@ -6,8 +6,8 @@ namespace Domain_Layer.Models
     {
         [Key]
         public int Id { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime? ModifiedOn { get; set; }
+        public DateTimeOffset CreatedDate { get; set; }
+        public DateTimeOffset? ModifiedOn { get; set; }
 
 
         public bool IsActive { get; set; }  

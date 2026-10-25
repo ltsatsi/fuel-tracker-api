@@ -5,13 +5,14 @@ namespace Domain_Layer.Mappers
 {
     public static class ProfileMapper
     {
-        public static ProfileDto ToProfileDto(this ApplicationUser user)
+        public static ProfileDto ToProfileDto(this ApplicationUser user, string? publicImageUrl)
         {
             return new ProfileDto
             {
+                Email = user.Email,
                 UserName = user.UserName,
                 Bio = user.Bio ?? "no bio yet",
-                Photo = user.Photo ?? "default.png",
+                Photo = publicImageUrl ?? user.Photo,
             };
         }
     } // end class

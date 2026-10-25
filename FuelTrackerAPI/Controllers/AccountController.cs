@@ -21,7 +21,11 @@ namespace FuelTrackerAPI.Controllers
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IEmailService _emailService;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtTokenService jwtTokenService, IEmailService emailService)
+        public AccountController(
+            UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            IJwtTokenService jwtTokenService, 
+            IEmailService emailService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
@@ -109,10 +113,10 @@ namespace FuelTrackerAPI.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccount([FromRoute] string id)
+        [HttpDelete("{email}")]
+        public async Task<IActionResult> DeleteAccount([FromRoute] string email)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user is null)
             {

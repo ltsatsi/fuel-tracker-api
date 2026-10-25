@@ -10,7 +10,6 @@ namespace Domain_Layer.Dtos.Account
 
         [Required]
         [EmailAddress]
-        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
 
         [Required]

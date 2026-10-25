@@ -4,6 +4,7 @@ namespace Domain_Layer.Dtos.FuelRecords
 {
     public class UpdateFuelRequest
     {
+        public int Id { get; set; }
         [Required]
         [Range(1, double.MaxValue)]
         public double Price { get; set; }

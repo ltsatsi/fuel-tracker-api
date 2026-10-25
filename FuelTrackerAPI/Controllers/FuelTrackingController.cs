@@ -96,8 +96,8 @@ namespace FuelTrackerAPI.Controllers
             return Ok(new MonthlyAnalytics
             {
                 VehicleId = vehicleId,
-                Year = year ?? DateTime.UtcNow.Year,
-                Month = month ?? DateTime.UtcNow.Month,
+                Year = year ?? DateTimeOffset.UtcNow.Year,
+                Month = month ?? DateTimeOffset.UtcNow.Month,
 
                 TotalFuelCost = totalFuelCost ?? 0,
                 TotalDistanceCovered = totalDistance ?? 0,
