@@ -1,0 +1,24 @@
+# Build artifacts
+**/bin/
+**/obj/
+
+# Visual Studio
+**/.vs/
+**/*.user
+**/*.suo
+
+# Environment and secrets
+**/.env
+**/appsettings.Development.json
+
+# Git
+.git/
+.gitignore
+
+# Docker
+**/Dockerfile*
+**/.dockerignore
+
+# IDE and temporary files
+.vscode/
+*.log
