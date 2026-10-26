@@ -43,7 +43,7 @@ namespace FuelTrackerAPI.Controllers
             var createResult = await _userManager.CreateAsync(user, request.Password);
 
             if (!createResult.Succeeded)
-                return StatusCode(500, createResult.Errors);
+                return BadRequest(createResult.Errors);
 
             string? token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));

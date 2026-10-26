@@ -32,6 +32,8 @@ namespace FuelTrackerAPI
             builder.Configuration["Supabase:Url"] = Environment.GetEnvironmentVariable("URL");
             builder.Configuration["Supabase:AnonKey"] = Environment.GetEnvironmentVariable("ANON_KEY");
 
+            builder.Configuration["Email:EmailApiKey"] = Environment.GetEnvironmentVariable("EMAIL_API_KEY");
+            builder.Configuration["Email:SenderName"] = Environment.GetEnvironmentVariable("SENDER_NAME");
             builder.Configuration["Email:Sender"] = Environment.GetEnvironmentVariable("SENDER");
             builder.Configuration["Email:Password"] = Environment.GetEnvironmentVariable("PASSWORD");
 
@@ -63,7 +65,7 @@ namespace FuelTrackerAPI
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IImageService, ImageService>();
+            builder.Services.AddHttpClient<IEmailService, EmailService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IFuelTrackingService, FuelTrackingService>();
 
