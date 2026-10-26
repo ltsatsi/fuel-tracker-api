@@ -51,26 +51,5 @@ namespace Service_Layer.Service
                     $"Brevo failed ({(int)response.StatusCode}): {details}");
             }
         }
-
-        //public async Task SendEmailAsync(Email model)
-        //{
-        //    MimeMessage email = new MimeMessage();
-
-        //    email.From.Add(MailboxAddress.Parse(_configuration["Email:Sender"]));
-        //    email.To.Add(MailboxAddress.Parse(model.To));
-        //    email.Subject = model.Subject;
-
-        //    email.Body = new TextPart("Html")
-        //    {
-        //        Text = model.Body,
-        //    };
-
-        //    using SmtpClient? smtp = new SmtpClient();
-
-        //    await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-        //    await smtp.AuthenticateAsync(_configuration["Email:Sender"], _configuration["Email:Password"]);
-        //    await smtp.SendAsync(email);
-        //    await smtp.DisconnectAsync(true);
-        //}
     } // end class
 } // end namespace

@@ -112,6 +112,17 @@ namespace FuelTrackerAPI
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("FlutterWeb", policy =>
+                {
+                    policy
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             #region Swagger .NET Core Web API JWT Setup
             builder.Services.AddSwaggerGen(option =>
             {
@@ -150,6 +161,8 @@ namespace FuelTrackerAPI
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
+
+            app.UseCors("FlutterWeb");
 
             app.UseAuthentication();
             app.UseAuthorization();
