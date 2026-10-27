@@ -64,7 +64,7 @@ namespace FuelTrackerAPI
             builder.Services.AddSingleton(supabase);
 
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddHttpClient<IEmailService, EmailService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IFuelTrackingService, FuelTrackingService>();
