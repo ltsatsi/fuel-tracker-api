@@ -16,7 +16,8 @@ namespace Service_Layer.Service
 
         public async Task<string> GetImageUrlAsync(string path)
         {
-            return _supabase.Storage.From(_bucket).GetPublicUrl(path);
+            var image =  _supabase.Storage.From(_bucket).GetPublicUrl(path);
+            return image.TrimEnd('?');
         }
 
         public async Task DeleteImageAsync(string path)
